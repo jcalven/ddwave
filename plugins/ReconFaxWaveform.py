@@ -51,7 +51,10 @@ def make_event(pulse, left, right, full_event=None):
 def get_full_event(event, N_PMTS=248, EVENT_SIZE=int(2e5)):
     waveforms = np.zeros((EVENT_SIZE, N_PMTS), dtype=np.float64)
     for i, (channel, left, right, pulse) in enumerate(zip(event.channel, event.left, event.right, event.waveform)):
-        waveforms[left:right+1, channel] += pulse
+        try:
+            waveforms[left:right+1, channel] += pulse
+        except ValueError:
+            print("left = {} and right = {} exceeds the event size array of size = {}".format(left, right, EVENT_SIZE))
     event_number = event.event_number.loc[0]
     event_out = pd.DataFrame(waveforms, columns=["channel_{}".format(i) for i in range(N_PMTS)])
     event_out["event_number"] = event_number

@@ -39,7 +39,7 @@ class Condensate(object):
 class Distill(object):
     
     N_PMTS = 248
-    EVENT_SIZE = int(2e5)
+    EVENT_SIZE = int(3.5e5)
     
     def __init__(self, zip_file=None, truth_file=None):
         
@@ -78,6 +78,6 @@ class Distill(object):
         
         event_numbers = self.pulses.event_number.unique()
         i = 1
-        while i <= n_events:
+        while i <= n_events and i < len(event_numbers):
             yield(self._get_event_data(event_numbers[i]))
             i += 1

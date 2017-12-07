@@ -62,15 +62,23 @@ class Distill(object):
         # Get some pax.event attributes (waveform, channel, etc.) from each pax event
         self.pulses = ReconFaxWaveform.get_pulses(self.events)
         # Get fax truth for all events
+        # if self.truth is not None:
         self.truth = FaxIO.LoadCSV(self.truth_file)
         # Get fax (input) instructions file
+        # if self.instructions_file is not None:
         self.instructions = FaxIO.LoadCSV(self.instructions_file)
         
     def _get_event_data(self, event_number):
         event = self.pulses.query("event_number == {}".format(event_number))
         waveforms_in_channels = ReconFaxWaveform.get_full_event(event, N_PMTS=self.N_PMTS, EVENT_SIZE=self.EVENT_SIZE)
-        event_truth = self.truth.query("instruction == {}".format(event_number))
-        event_instructions = self.instructions.query("instruction == {}".format(event_number))
+        if self.truth is not None:
+            event_truth = self.truth.query("instruction == {}".format(event_number))
+        else:
+            event_truth = None
+        if self.instructions is not None:
+            event_instructions = self.instructions.query("instruction == {}".format(event_number))
+        else:
+            event_instructions = None
         return Condensate(event, waveforms_in_channels, event_truth, event_instructions)
     
     #@nb.jit(nopython=True)

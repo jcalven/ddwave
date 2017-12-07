@@ -1,7 +1,7 @@
 # import plugins.FaxIO as faxio
 # import plugins.ReconFaxWaveform
 from plugins import FaxIO, ReconFaxWaveform
-
+import numba as nb
 
 class Condensate(object):
     
@@ -15,11 +15,12 @@ class Condensate(object):
             : get_event_truth() : Returns pandas.DataFrame with FAX truth information on the event
     """
     
-    def __init__(self, event=None, waveforms_in_channels=None, event_truth=None):
+    def __init__(self, event=None, waveforms_in_channels=None, event_truth=None, event_instructions=None):
         
         self._event = event
         self._waveforms_in_channels = waveforms_in_channels
         self._event_truth = event_truth
+        self._event_instructions = event_instructions
         
     def get_event(self):
         """Returns pandas.DataFrame with core information on pulses in the event"""
@@ -34,6 +35,10 @@ class Condensate(object):
         """Returns pandas.DataFrame with FAX truth information on the event"""
         return self._event_truth
     
+    def get_event_instructions(self):
+        """Returns pandas.DataFrame with FAX truth information on the event"""
+        return self._event_instructions
+    
     
 
 class Distill(object):
@@ -41,13 +46,15 @@ class Distill(object):
     N_PMTS = 248
     EVENT_SIZE = int(3.5e5)
     
-    def __init__(self, zip_file=None, truth_file=None):
+    def __init__(self, zip_file=None, truth_file=None, instructions_file=None):
         
         self.zip_file = zip_file
         self.truth_file = truth_file
+        self.instructions_file = instructions_file
         self.events = None
         self.pulses = None
         self.truth = None
+        self.instructions = None
         
     def load(self):
         # Read pax events from zip file
@@ -55,14 +62,18 @@ class Distill(object):
         # Get some pax.event attributes (waveform, channel, etc.) from each pax event
         self.pulses = ReconFaxWaveform.get_pulses(self.events)
         # Get fax truth for all events
-        self.truth = FaxIO.LoadTruth(self.truth_file)
+        self.truth = FaxIO.LoadCSV(self.truth_file)
+        # Get fax (input) instructions file
+        self.instructions = FaxIO.LoadCSV(self.instructions_file)
         
     def _get_event_data(self, event_number):
         event = self.pulses.query("event_number == {}".format(event_number))
         waveforms_in_channels = ReconFaxWaveform.get_full_event(event, N_PMTS=self.N_PMTS, EVENT_SIZE=self.EVENT_SIZE)
-        event_truth = self.truth.query("event == {}".format(event_number))
-        return Condensate(event, waveforms_in_channels, event_truth)
+        event_truth = self.truth.query("instruction == {}".format(event_number))
+        event_instructions = self.instructions.query("instruction == {}".format(event_number))
+        return Condensate(event, waveforms_in_channels, event_truth, event_instructions)
     
+    #@nb.jit(nopython=True)
     def get(self, n_events):
         """Returns an iterator of tuples containing:
                 : event : DataFrame with event information

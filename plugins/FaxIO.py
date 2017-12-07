@@ -51,18 +51,17 @@ class LoadEvent(object):
         return pickle.loads(data)
     
 
-class LoadTruth(object):
+class LoadCSV(object):
     
-    def __new__(cls, truth_file=None):
-        if truth_file is not None:
-            truth = cls.load(truth_file)
-            return truth
+    def __new__(cls, filename=None):
+        if filename is not None:
+            return cls.load(filename)
     
     @classmethod    
-    def load(cls, truth_file):
-        return pd.read_csv(truth_file)
+    def load(cls, filename):
+        return pd.read_csv(filename)
     
-
+    
 # For multiprocessing reading/unzipping PAX raw date. 
 # NOT IN USE!
 def process(n=1, zipfile=None, event_numbers=None):

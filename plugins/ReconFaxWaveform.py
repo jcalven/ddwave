@@ -48,7 +48,7 @@ def make_event(pulse, left, right, full_event=None):
     return full_event
 
 # @nb.jit(nopython=True)
-def get_full_event(event, N_PMTS=248, EVENT_SIZE=int(2e5)):
+def get_full_event(event, N_PMTS=248, EVENT_SIZE=int(3.5e5)):
     waveforms = np.zeros((EVENT_SIZE, N_PMTS), dtype=np.float64)
     for i, (channel, left, right, pulse) in enumerate(zip(event.channel, event.left, event.right, event.waveform)):
         try:

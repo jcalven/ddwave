@@ -87,6 +87,8 @@ def run(file, n=1):
     zipfile.open(file)
     
     event_numbers = zipfile.get_event_numbers_in_current_file()
+    # if n is not None:
+    #    event_numbers = event_numbers[0:n]
     
     for ev in tqdm(event_numbers):
         events.append(get_event(zipfile, ev))

@@ -48,12 +48,12 @@ class PulseProperties(object): #plugin.TransformPlugin):
             # This is convenient so we don't have to reinterpret min, max, etc
             w = reference_baseline - w
             
-            # 
-            if self.transform_raw:
-                pulse.raw_data = w
-
             _results = compute_pulse_properties(w, n_baseline)
             pulse.baseline, pulse.baseline_increase, pulse.noise_sigma, pulse.minimum, pulse.maximum = _results
+            
+            # Set the waveform to the modified waveform
+            if self.transform_raw:
+                pulse.raw_data = w - pulse.baseline
 
             if n_pulses > shrink_data_threshold:
                 # Remove the start and end of each pulse, which don't contain much useful information, but

@@ -12,7 +12,7 @@ class PulseProperties(object): #plugin.TransformPlugin):
     warning_given = False
     config = {"digitizer_reference_baseline": 16000, 
               "baseline_samples": 47,
-              "shrink_data_threshold": 5000}
+              "shrink_data_threshold": float('inf')}
     
     def __init__(self, config=None):
         if config is not None:

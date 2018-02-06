@@ -6,7 +6,7 @@ from pax import plugin
 class PulseProperties(object): #plugin.TransformPlugin):
     """Compute pulse properties such as the baseline and noise level.
     Optionally, deletes the left and right extreme ends of the pulses in large events to reduce datasets.
-    Note the raw data of the pulse is not in any way modified: the computed baseline is not actually subtracted.
+    Note the raw data of the pulse is modified: the computed baseline _is_ subtracted (unless transform_raw=False)
     If the raw data already has the pulse properties pre-computed, no action is taken.
     """
     warning_given = False
@@ -14,11 +14,15 @@ class PulseProperties(object): #plugin.TransformPlugin):
               "baseline_samples": 47,
               "shrink_data_threshold": float('inf')}
     
-    def __init__(self, config=None):
+    def __init__(self, config=None, transform_raw=True):
         if config is not None:
             self.config = config
+        self.transform_raw = transform_raw
 
-    def transform_event(self, event):
+    def transform_event(self, event, transform_raw=None):
+        if transform_raw is not None:
+            self.transform_raw = transform_raw
+            
         # Local variables are marginally faster to access in inner loop, so we don't put these in startup.
         reference_baseline = self.config['digitizer_reference_baseline']
 
@@ -43,6 +47,10 @@ class PulseProperties(object): #plugin.TransformPlugin):
             # Subtract reference baseline, invert (so hits point up from baseline)
             # This is convenient so we don't have to reinterpret min, max, etc
             w = reference_baseline - w
+            
+            # 
+            if self.transform_raw:
+                pulse.raw_data = w
 
             _results = compute_pulse_properties(w, n_baseline)
             pulse.baseline, pulse.baseline_increase, pulse.noise_sigma, pulse.minimum, pulse.maximum = _results

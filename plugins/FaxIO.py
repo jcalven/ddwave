@@ -6,6 +6,7 @@ import zipfile
 import pickle
 import zlib
 from tqdm import tqdm
+import numba as nb
 from plugins.PulseProperties import PulseProperties
 
 class ReadZipped(object):
@@ -81,6 +82,7 @@ def get_event(zipfile, event_number):
     event = LoadEvent(zipfile.get_single_event_in_current_file(event_number))
     return event
 
+#@nb.jit(nopython=True)
 def run(file, n=1, pulse_properties=True):
     """Retrieve pax Event objects for all events"""
     events = []
@@ -100,3 +102,14 @@ def run(file, n=1, pulse_properties=True):
         else:
             events.append(event)#get_event(zipfile, ev))
     return events
+
+def run_stream(zipfile_stream, event_i=0, pulse_properties=True, event_numbers=None):
+    """Retrieve pax Event objects for one event"""
+    properties = PulseProperties()
+    event = get_event(zipfile_stream, event_numbers[event_i])
+    if pulse_properties:
+        return properties.transform_event(event)
+    else:
+        return event
+        
+#def Zip(

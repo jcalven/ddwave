@@ -41,6 +41,10 @@ def get_pulses(events):
     for i in tqdm(range(n_events)):
         max_waveforms_lengths.append(get_pulse(events[i].pulses, i))
     return pd.concat(max_waveforms_lengths)
+
+# @nb.jit(nopython=True)
+def get_pulses_in_event(event):
+    return get_pulse(event.pulses, event_number=event.event_number)
     
 # @nb.jit(nopython=True)
 def make_event(pulse, left, right, full_event=None):
@@ -52,6 +56,10 @@ def get_full_event(event, N_PMTS=248, EVENT_SIZE=int(3.5e5)):
     waveforms = np.zeros((EVENT_SIZE, N_PMTS), dtype=np.float64)
     for i, (channel, left, right, pulse) in enumerate(zip(event.channel, event.left, event.right, event.waveform)):
         try:
+            # print("=====================")
+            # print(left)
+            # print(right)
+            # print("=====================")
             waveforms[left:right+1, channel] += pulse
         except ValueError:
             print("left = {} and right = {} exceeds the event size array of size = {}".format(left, right, EVENT_SIZE))

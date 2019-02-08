@@ -1,9 +1,10 @@
-import numba
+#!/usr/bin/env python
+
 import numpy as np
 
 from pax import plugin
 
-class PulseProperties(object): #plugin.TransformPlugin):
+class PulseProperties(object):
     """Compute pulse properties such as the baseline and noise level.
     Optionally, deletes the left and right extreme ends of the pulses in large events to reduce datasets.
     Note the raw data of the pulse is modified: the computed baseline _is_ subtracted (unless transform_raw=False)
@@ -37,7 +38,6 @@ class PulseProperties(object): #plugin.TransformPlugin):
         for pulse_i, pulse in enumerate(event.pulses):
             if not np.isnan(pulse.minimum):
                 if not warning_given:
-                    # self.log.info("Pulse properties have already been computed, doing nothing.")
                     self.warning_given = True
                 return event
 
@@ -61,15 +61,6 @@ class PulseProperties(object): #plugin.TransformPlugin):
                 pulse.raw_data = pulse.raw_data[shrink_data_samples:-shrink_data_samples]
                 pulse.right -= n_baseline
                 pulse.left += n_baseline
-
-                # Store some "advanced" pulse properties as ints rather than floats to save space
-                # TODO: disabled, seems to freak out ROOT output??
-                # Do NOT round noise sigma as an int, it could come out to 0, and precision matters here
-                # pulse.maximum = int(round(pulse.maximum))
-                # pulse.minimum = int(round(pulse.minimum))
-                # pulse.baseline = int(round(pulse.baseline))
-                # pulse.baseline_increase = int(round(pulse.baseline_increase))
-
         return event
 
 
@@ -117,7 +108,7 @@ def compute_pulse_properties(w, baseline_samples):
             m2 += delta*(x-baseline)
 
     if n == 0:
-        # Should only happen if w = baseline everywhere
+        # Should only happen if w == baseline everywhere
         noise = 0
     else:
         noise = (m2/n)**0.5

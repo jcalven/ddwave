@@ -1,7 +1,7 @@
-# import plugins.FaxIO as faxio
-# import plugins.ReconFaxWaveform
+#!/usr/bin/env python
+
 from plugins import FaxIO, ReconFaxWaveform
-import numba as nb
+
 
 class Condensate(object):
     
@@ -92,12 +92,6 @@ class Distill(object):
         self.events = FaxIO.run(self.zip_file, pulse_properties=pulse_properties)
         # Get some pax.event attributes (waveform, channel, etc.) from each pax event
         self.pulses = ReconFaxWaveform.get_pulses(self.events)
-        # Get fax truth for all events
-        # if self.truth is not None:
-        # self.truth = FaxIO.LoadCSV(self.truth_file)
-        # Get fax (input) instructions file
-        # if self.instructions_file is not None:
-        # self.instructions = FaxIO.LoadCSV(self.instructions_file)
         
     def _get_event_data(self, event_number):
         event = self.pulses.query("event_number == {}".format(event_number))
@@ -124,7 +118,6 @@ class Distill(object):
             event_instructions = None
         return Condensate(pax_event, pulses, waveforms_in_channels, event_truth, event_instructions)
     
-    #@nb.jit(nopython=True)
     def get(self, n_events):
         """Returns an iterator of tuples containing:
                 : event : DataFrame with event information
@@ -144,7 +137,6 @@ class Distill(object):
             yield(self._get_event_data(event_numbers[i-1]))
             i += 1
             
-    #@nb.jit(nopython=True)
     def get_event(self, n_events, pulse_properties=True, zipfile=None, **kwargs):
         """Returns an iterator of tuples containing:
                 : event : DataFrame with event information
@@ -168,6 +160,6 @@ class Distill(object):
             if pulses is None:
                 print("---> Event {} does not have any pulses. Skipping...".format(event_numbers[i]))
             else:
-                yield(self._get_event_data_stream(pax_event, pulses))#event_numbers[i-1]))
+                yield(self._get_event_data_stream(pax_event, pulses))
             i += 1
         self.close_zip(zipfile_stream)

@@ -6,7 +6,6 @@ import zipfile
 import pickle
 import zlib
 from tqdm import tqdm
-import numba as nb
 from plugins.PulseProperties import PulseProperties
 
 class ReadZipped(object):
@@ -64,8 +63,7 @@ class LoadCSV(object):
         return pd.read_csv(filename)
     
     
-# For multiprocessing reading/unzipping PAX raw date. 
-# NOT IN USE!
+### For multiprocessing reading/unzipping PAX raw date. Deprecated.
 def process(n=1, zipfile=None, event_numbers=None):
  
     start_time = time.time()
@@ -82,7 +80,6 @@ def get_event(zipfile, event_number):
     event = LoadEvent(zipfile.get_single_event_in_current_file(event_number))
     return event
 
-#@nb.jit(nopython=True)
 def run(file, n=1, pulse_properties=True):
     """Retrieve pax Event objects for all events"""
     events = []
@@ -90,9 +87,6 @@ def run(file, n=1, pulse_properties=True):
     zipfile.open(file)
     
     event_numbers = zipfile.get_event_numbers_in_current_file()
-    # if n is not None:
-    #    event_numbers = event_numbers[0:n]
-    
     properties = PulseProperties()
     
     for ev in tqdm(event_numbers):
@@ -100,7 +94,7 @@ def run(file, n=1, pulse_properties=True):
         if pulse_properties:
             events.append(properties.transform_event(event))
         else:
-            events.append(event)#get_event(zipfile, ev))
+            events.append(event)
     return events
 
 def run_stream(zipfile_stream, event_i=0, pulse_properties=True, event_numbers=None):
@@ -111,5 +105,3 @@ def run_stream(zipfile_stream, event_i=0, pulse_properties=True, event_numbers=N
         return properties.transform_event(event)
     else:
         return event
-        
-#def Zip(
